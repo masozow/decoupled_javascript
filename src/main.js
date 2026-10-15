@@ -1,6 +1,7 @@
 import { UserCardList } from './features/user/ui/components/UserCardList.js';
 import { ApiUserRepository } from './features/user/infrastructure/ApiUserRepository.js';
 import { HttpClient } from './shared/infrastructure/HttpClient.js';
+import { debounce } from './shared/utils/debounce.js';
 try {
     const usersRepo = new ApiUserRepository(HttpClient);
     const results = document.getElementById('results');
@@ -10,7 +11,8 @@ try {
         console.log(users);
         results.innerHTML = UserCardList(users);
     }
-    searchBox.addEventListener('input', (e) => handleSearch(e.target.value));
+    const debouncedSearch = debounce(handleSearch, 500);
+    searchBox.addEventListener('input', (e) => debouncedSearch(e.target.value));
 } catch (error) {
     console.error(error);
 }
