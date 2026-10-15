@@ -1,7 +1,9 @@
+import { esc } from "../../../../shared/utils/escapeHTML.js";
+
 export const UserCard = (user) => `
-    <article data-id='${user.id}' class='card ${user.isFavorite ? 'fav' : ''}'>
-        <h3>${user.name}</h3>
-        <p>${user.email}</p>
+    <article data-id='${esc(user.id)}' class='card ${user.isFavorite ? 'fav' : ''}'>
+        <h3>${esc(user.name)}</h3>
+        <p>${esc(user.email)}</p>
         <button data-action='toggle-favorite'>
             ${user.isFavorite ? '[*] Remove favorite' : '[ ] Mark as favorite'}
         </button>
