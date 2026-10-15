@@ -1,0 +1,17 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 10%;
+}
+
+body {
+    background-color: rgb(40, 40, 40);
+    color: #ccc;
+    border-color: #ccc;
+}
