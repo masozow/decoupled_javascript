@@ -20,3 +20,13 @@ export const expect = (actual) => {
         }
     }
 }
+
+export const silenced = async (fn) => {
+    const originalConsoleError = console.error;
+    console.error = () => { }
+    try {
+        await fn();
+    } finally {
+        console.error = originalConsoleError;
+    }
+}

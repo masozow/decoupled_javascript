@@ -13,3 +13,4 @@ try {
 }
 
 
+import('./shared/tests/index.js');
