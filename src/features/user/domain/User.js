@@ -5,4 +5,7 @@ export class User {
         this.email = email;
         this.isFavorite = isFavorite;
     }
+    toggleFavorite() {
+        this.isFavorite = !this.isFavorite;
+    }
 }
