@@ -1,5 +1,5 @@
 export const HttpClient = async ({ url, options = {}, fetch = window.fetch }) => {
-    const error_prefix = '[Fetch error] ';
+    const error_prefix = '[Shared Infra Error] HttpClient. ';
     try {
         const config = {
             ...options,

@@ -1,0 +1,22 @@
+export const describe = async (message, fn) => {
+    console.group(message)
+    await fn();
+    console.groupEnd();
+}
+
+export const it = async (description, fn) => {
+    try {
+        await fn();
+        console.log(`[1] ${description}`)
+    } catch (error) {
+        console.error(`[0] ${description} -> ${error}`)
+    }
+}
+
+export const expect = (actual) => {
+    return {
+        toBe: (expected) => {
+            if (actual !== expected) throw new Error(`Expected: ${expected}, but received: ${actual}`);
+        }
+    }
+}
