@@ -9,13 +9,14 @@ export class ApiUserRepository {
     }
 
     async search(query) {
-        if (!query) throw new Error(ApiUserRepository.#errorPrefix + ' Query is required');
+        if (typeof query != 'string') throw new Error(ApiUserRepository.#errorPrefix + ' Query is required');
+        if (!query.trim()) return [];
         const response = await this.httpClient({ url: this.endpoint });
         if (!Array.isArray(response))
             throw new Error(
                 ApiUserRepository.#errorPrefix + `API response wasn't a valid Array: ${response}`
             );
-        return response.map((user) => new User(user.id, user.name, user.email));
+        return response.filter((user) => user.name.includes(query)).map((user) => new User(user.id, user.name, user.email));
     }
 
 }
