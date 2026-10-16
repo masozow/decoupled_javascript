@@ -4,6 +4,23 @@
     gap: 1rem;
 }
 
+main {
+    display: grid;
+    place-items: center;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+main input {
+    justify-self: center;
+    width: 100%;
+    max-width: 20rem;
+}
+
+main #results {
+    width: 100%;
+}
+
 .card {
     padding: 1rem;
     border: 1px solid #ccc;

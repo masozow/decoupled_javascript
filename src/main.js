@@ -18,15 +18,18 @@ try {
     searchBox.addEventListener('input', (e) => debouncedSearch(e.target.value));
     //#endregion
     //#region Favorites logic
-    results.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-action=toggle-favorite]');
-        if (!btn) return;
-        const card = btn.closest('.card');
-        if (card && card.dataset.id) {
-            const userId = card.dataset.id;
-            userService.toggleFavorite(userId);
-        }
-    });
+    const actions = {
+        'toggle-favorite': ({ card }) => userService.toggleFavorite(card.dataset.id)
+    }
+    results.addEventListener('click',
+        /** @type {Event} */
+        (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            const handler = actions[btn.dataset.action];
+            if (!handler) return;
+            handler({ card: btn.closest('.card') });
+        });
     //#endregion
 } catch (error) {
     console.error(error);
