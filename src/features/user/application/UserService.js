@@ -1,14 +1,15 @@
 export class UserService {
     static #error_prefix = '[App error] UserSearchService.';
     #state;
-    constructor({ userRepo }) {
-        if (!userRepo) throw new Error(UserService.#error_prefix + ' User repository is required');
+    constructor({ userRepo, favRepo }) {
+        if (!userRepo) throw new Error(UserService.#error_prefix + ' User repository is required.');
+        if (!favRepo) throw new Error(UserService.#error_prefix + ' Favorites repository is required.');
         this.userRepo = userRepo;
+        this.favRepo = favRepo;
         this.#state = {
             isLoading: false,
             isError: false,
             users: [],
-            favorites: []
         }
         this.currentReqId = 0;
         this.listeners = new Set();
@@ -32,9 +33,11 @@ export class UserService {
             //We were updating state directly, but state should only be 
             //updated when it's been synced with favorites
             const users = await this.userRepo.search(query);
+            const { getFavorites } = this.favRepo();
             if (reqId !== this.currentReqId) return;
             //#region Sync users isFavorite value with favorites state
-            users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
+            const favorites = getFavorites();
+            users.forEach((user) => user.isFavorite = favorites.includes(user.id));
             this.#state.users = users;
             this.#state.isLoading = false;
             this.#notify();
@@ -49,11 +52,13 @@ export class UserService {
 
     toggleFavorite(userId) {
         if (!userId) throw new Error(UserService.#error_prefix + ' UserId is required.');
+        const { getFavorites, setFavorites } = this.favRepo();
+        const favorites = getFavorites();
         //#region Updating favorites state
-        if (this.#state.favorites.includes(userId)) {
-            this.#state.favorites = this.#state.favorites.filter((id) => id !== userId)
+        if (favorites.includes(userId)) {
+            favorites = favorites.filter((id) => id !== userId)
         } else {
-            this.#state.favorites.push(userId);
+            setFavorites(favorites);
         }
         //#endregion
 
