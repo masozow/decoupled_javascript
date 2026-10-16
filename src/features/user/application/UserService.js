@@ -23,10 +23,8 @@ export class UserService {
     async search(query) {
         if (typeof query !== 'string') throw new Error(UserService.#error_prefix + ' Query must be as string.');
         this.#state.users = await this.userRepo.search(query);
-        console.log(this.#state.users);
         //#region Sync users isFavorite value with favorites state
         this.#state.users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
-        console.log('Users at Service:', this.#state.users);
         this.#notify();
         //#endregion
     }
@@ -39,7 +37,6 @@ export class UserService {
         } else {
             this.#state.favorites.push(userId);
         }
-        console.log('Favorites at service: ', this.#state.favorites);
         //#endregion
 
         //Updating individual user state
