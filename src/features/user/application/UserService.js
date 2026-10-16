@@ -19,13 +19,21 @@ export class UserService {
     }
     toggleFavorite(userId) {
         if (!userId) throw new Error(UserService.#error_prefix + ' UserId is required.');
+        //#region Updating favorites state
         if (this.#state.favorites.includes(userId)) {
             this.#state.favorites = this.#state.favorites.filter((id) => id !== userId)
         } else {
             this.#state.favorites.push(userId);
         }
+        //#endregion
+        //#region Sync users isFavorite value with favorites state
+        this.#state.users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
+        console.log('Users after syncing favortes:', this.#state.users.map((user) => `ID: ${user.id} - Favorite: ${user.isFavorite}`));
+        //#endregion
+        //Updating individual user state
         const userFound = this.#state.users.find((user) => user.id === userId);
         if (userFound) userFound.toggleFavorite();
+
         console.log('Favorites:', this.#state.favorites);
     }
 }

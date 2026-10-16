@@ -19,7 +19,7 @@ try {
     //#endregion
     //#region Favorites logic
     const actions = {
-        'toggle-favorite': ({ card }) => userService.toggleFavorite(card.dataset.id)
+        'toggle-favorite': ({ card }) => userService.toggleFavorite(Number(card.dataset.id))
     }
     results.addEventListener('click',
         /** @type {Event} */
