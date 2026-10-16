@@ -24,17 +24,19 @@ export class UserService {
         return () => this.listeners.delete(listener);
     }
     async search(query) {
+        //Creating a unique ticket for this search
+        const reqId = ++this.currentReqId;
         try {
             if (typeof query !== 'string') throw new Error(UserService.#error_prefix + ' Query must be as string.');
-            const reqId = ++this.currentReqId;
             this.#state.isError = false;
             this.#state.isLoading = true;
             this.#notify();
             //We were updating state directly, but state should only be 
             //updated when it's been synced with favorites
             const users = await this.userRepo.search(query);
-            const { getFavorites } = this.favRepo();
+            //If there's an old search, we ignore it
             if (reqId !== this.currentReqId) return;
+            const { getFavorites } = this.favRepo();
             //#region Sync users isFavorite value with favorites state
             const favorites = getFavorites();
             users.forEach((user) => user.isFavorite = favorites.includes(user.id));
@@ -43,6 +45,8 @@ export class UserService {
             this.#notify();
             //#endregion
         } catch (error) {
+            //Even errors from an old search will be ignored
+            if (this.currentReqId !== reqId) return;
             console.error(UserService.#error_prefix + error);
             this.#state.isError = true;
             this.#state.isLoading = false;
