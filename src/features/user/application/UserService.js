@@ -13,6 +13,8 @@ export class UserService {
         }
         this.currentReqId = 0;
         this.listeners = new Set();
+        //We store a query value while an instance of this object lives
+        this.lastQuery = '';
     }
     #notify() {
         this.listeners.forEach((listener) => listener(this.#state));
@@ -28,12 +30,18 @@ export class UserService {
         const reqId = ++this.currentReqId;
         try {
             if (typeof query !== 'string') throw new Error(UserService.#error_prefix + ' Query must be as string.');
+            const normalizedQuery = query.trim();
+            // We compare the value of the last call of this same instance,
+            // with the current query value we are getting, if it's the same,
+            // we save network resources and renders while ignoring it.
+            if (this.lastQuery === normalizedQuery) return;
+            this.lastQuery = normalizedQuery;
             this.#state.isError = false;
             this.#state.isLoading = true;
             this.#notify();
             //We were updating state directly, but state should only be 
             //updated when it's been synced with favorites
-            const users = await this.userRepo.search(query);
+            const users = await this.userRepo.search(normalizedQuery);
             //If there's an old search, we ignore it
             if (reqId !== this.currentReqId) return;
             const { getFavorites } = this.favRepo();
