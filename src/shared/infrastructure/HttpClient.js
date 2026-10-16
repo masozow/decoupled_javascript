@@ -1,16 +1,19 @@
 export const HttpClient = async ({ url, options = {}, fetch = window.fetch }) => {
     const error_prefix = '[Shared Infra Error] HttpClient. ';
+    const { body, headers = {}, ...rest } = options;
     try {
         const config = {
-            ...options,
+            ...rest,
             headers: {
-                'Content-Type': 'application/json',
-                ...(options.headers || {})
+                ...headers
             }
         }
-        if (options.body) config.body = JSON.stringify(options.body);
+        if (body) {
+            config.body = JSON.stringify(body);
+            config.headers['Content-Type'] = 'application/json';
+        }
         const response = await fetch(url, config);
-        if (!response.ok) throw new Error(`${error_prefix} Status:${response.status} - ${response.statusText}. At: ${URL}`);
+        if (!response.ok) throw new Error(`${error_prefix} Status:${response.status} - ${response.statusText}. At: ${url}`);
         return response.json();
     } catch (error) {
         console.error(`${error_prefix}`, error);
