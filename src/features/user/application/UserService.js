@@ -65,13 +65,14 @@ export class UserService {
     toggleFavorite(userId) {
         if (!userId) throw new Error(UserService.#error_prefix + ' UserId is required.');
         const { getFavorites, setFavorites } = this.favRepo();
-        const favorites = getFavorites();
+        let favorites = getFavorites();
         //#region Updating favorites state
         if (favorites.includes(userId)) {
             favorites = favorites.filter((id) => id !== userId)
         } else {
-            setFavorites(favorites);
+            favorites.push(userId);
         }
+        setFavorites(favorites);
         //#endregion
 
         //Updating individual user state

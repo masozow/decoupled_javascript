@@ -4,7 +4,7 @@ export const esc = (value) => {
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        "'": '&#39'
+        "'": '&#39;'
     }
     return String(value).replace(/[&<>"']/g, (char) => ESCAPE_HTML[char]);
 }
