@@ -1,16 +1,23 @@
 import { UserCardList } from './components/UserCardList.js';
 import { debounce } from '../../../shared/utils/debounce.js';
+import { Empty, Loading, ErrorMessage } from '../../../shared/ui/components/index.js';
 
-const renderUsers = (state) => {
+const error_prefix = '[UI error] UserController.';
+
+const renderUsers = (state, query) => {
+    if (!state) throw new Error(error_prefix + ' State is required');
+    if (query === undefined) throw new Error(error_prefix + ' Query is requried');
+    if (state.isError) return ErrorMessage();
+    if (state.isLoading) return Loading();
+    if (state.users.length === 0) return query ? Empty() : '';
     return UserCardList(state.users);
 }
 
 export const userController = (userService, dom) => {
-    const error_prefix = '[UI error] UserController.';
     if (!userService) throw new Error(error_prefix + ' userService is required.');
     const { input, results } = dom;
     if (!input || !results) throw new Error(error_prefix + " Input and Results Elements are required");
-    userService.subscribe((state) => results.innerHTML = renderUsers(state))
+    userService.subscribe((state) => results.innerHTML = renderUsers(state, input.value.trim()))
     //#region Search logic
     // const handleSearch = async (query) => {
     //     const users = await userService.search(query);

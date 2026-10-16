@@ -5,10 +5,12 @@ export class UserService {
         if (!userRepo) throw new Error(UserService.#error_prefix + ' User repository is required');
         this.userRepo = userRepo;
         this.#state = {
+            isLoading: false,
+            isError: false,
             users: [],
             favorites: []
         }
-
+        this.currentReqId = 0;
         this.listeners = new Set();
     }
     #notify() {
@@ -21,12 +23,28 @@ export class UserService {
         return () => this.listeners.delete(listener);
     }
     async search(query) {
-        if (typeof query !== 'string') throw new Error(UserService.#error_prefix + ' Query must be as string.');
-        this.#state.users = await this.userRepo.search(query);
-        //#region Sync users isFavorite value with favorites state
-        this.#state.users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
-        this.#notify();
-        //#endregion
+        try {
+            if (typeof query !== 'string') throw new Error(UserService.#error_prefix + ' Query must be as string.');
+            const reqId = ++this.currentReqId;
+            this.#state.isError = false;
+            this.#state.isLoading = true;
+            this.#notify();
+            //We were updating state directly, but state should only be 
+            //updated when it's been synced with favorites
+            const users = await this.userRepo.search(query);
+            if (reqId !== this.currentReqId) return;
+            //#region Sync users isFavorite value with favorites state
+            users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
+            this.#state.users = users;
+            this.#state.isLoading = false;
+            this.#notify();
+            //#endregion
+        } catch (error) {
+            console.error(UserService.#error_prefix + error);
+            this.#state.isError = true;
+            this.#state.isLoading = false;
+            this.#notify();
+        }
     }
 
     toggleFavorite(userId) {
