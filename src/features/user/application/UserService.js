@@ -4,7 +4,6 @@ export class UserService {
     constructor({ userRepo }) {
         if (!userRepo) throw new Error(UserService.#error_prefix + ' User repository is required');
         this.userRepo = userRepo;
-        this.results = results;
         this.#state = {
             users: [],
             favorites: []
@@ -15,8 +14,13 @@ export class UserService {
         if (typeof query !== 'string') throw new Error(UserService.#error_prefix + ' Query must be as string.');
         this.#state.users = await this.userRepo.search(query);
         console.log(this.#state.users);
+        //#region Sync users isFavorite value with favorites state
+        this.#state.users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
+        console.log('Users at Service:', this.#state.users);
+        //#endregion
         return this.#state.users;
     }
+
     toggleFavorite(userId) {
         if (!userId) throw new Error(UserService.#error_prefix + ' UserId is required.');
         //#region Updating favorites state
@@ -25,15 +29,14 @@ export class UserService {
         } else {
             this.#state.favorites.push(userId);
         }
+        console.log('Favorites at service: ', this.#state.favorites);
         //#endregion
-        //#region Sync users isFavorite value with favorites state
-        this.#state.users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
-        console.log('Users after syncing favortes:', this.#state.users.map((user) => `ID: ${user.id} - Favorite: ${user.isFavorite}`));
-        //#endregion
+
         //Updating individual user state
         const userFound = this.#state.users.find((user) => user.id === userId);
         if (userFound) userFound.toggleFavorite();
-
-        console.log('Favorites:', this.#state.favorites);
+        //Return synced users after update, but this needs that every component
+        //ask for the state.
+        return this.#state.users;
     }
 }
