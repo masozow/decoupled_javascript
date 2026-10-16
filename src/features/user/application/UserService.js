@@ -8,8 +8,18 @@ export class UserService {
             users: [],
             favorites: []
         }
-    }
 
+        this.listeners = new Set();
+    }
+    #notify() {
+        this.listeners.forEach((listener) => listener(this.#state));
+    }
+    subscribe(listener) {
+        if (typeof listener !== 'function') throw new Error(UserService.#error_prefix + ' Listener must be a function');
+        this.listeners.add(listener);
+        listener(this.#state);
+        return () => this.listeners.delete(listener);
+    }
     async search(query) {
         if (typeof query !== 'string') throw new Error(UserService.#error_prefix + ' Query must be as string.');
         this.#state.users = await this.userRepo.search(query);
@@ -17,8 +27,8 @@ export class UserService {
         //#region Sync users isFavorite value with favorites state
         this.#state.users.forEach((user) => user.isFavorite = this.#state.favorites.includes(user.id));
         console.log('Users at Service:', this.#state.users);
+        this.#notify();
         //#endregion
-        return this.#state.users;
     }
 
     toggleFavorite(userId) {
@@ -37,6 +47,6 @@ export class UserService {
         if (userFound) userFound.toggleFavorite();
         //Return synced users after update, but this needs that every component
         //ask for the state.
-        return this.#state.users;
+        this.#notify();
     }
 }

@@ -7,19 +7,19 @@ try {
     const usersRepo = new ApiUserRepository(HttpClient);
     const userService = new UserService({ userRepo: usersRepo });
 
-    const renderUsers = (users) => {
+    const renderUsers = (state) => {
         const results = document.getElementById('results');
-        results.innerHTML = UserCardList(users);
+        results.innerHTML = UserCardList(state.users);
     }
-
+    userService.subscribe(renderUsers)
     //#region Search logic
     const searchBox = document.getElementById('search');
-    const handleSearch = async (query) => {
-        const users = await userService.search(query);
-        console.log(users);
-        renderUsers(users);
-    }
-    const debouncedSearch = debounce(handleSearch, 500);
+    // const handleSearch = async (query) => {
+    //     const users = await userService.search(query);
+    //     console.log(users);
+    //     renderUsers(users);
+    // }
+    const debouncedSearch = debounce(async (query) => await userService.search(query), 500);
     searchBox.addEventListener('input', (e) => debouncedSearch(e.target.value));
     //#endregion
     //#region Favorites logic
@@ -31,9 +31,7 @@ try {
         if (!btn) return;
         const handler = actions[btn.dataset.action];
         if (!handler) return;
-        const newUsers = handler({ card: btn.closest('.card') });
-        console.log('New users:', newUsers);
-        renderUsers(render);
+        handler({ card: btn.closest('.card') });
     });
     //#endregion
 } catch (error) {
