@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userService.subscribe(renderUsers)
         //#region Search logic
         const searchBox = document.getElementById('search');
+
         // const handleSearch = async (query) => {
         //     const users = await userService.search(query);
         //     console.log(users);
@@ -28,10 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         results.addEventListener('click', (e) => {
             const btn = e.target.closest('[data-action]');
+            console.log(btn);
+            console.dir(btn);
+            console.log('In button, dataset value from key Action: ', btn.dataset.action);
             if (!btn) return;
-            const handler = actions[btn.dataset.action];
-            if (!handler) return;
-            handler({ card: btn.closest('.card') });
+            const action_real_function = actions[btn.dataset.action];
+            const card = btn.closest('.card');
+            console.log(card);
+            console.dir(card);
+            console.log('In card, dataset key value pairs: ', JSON.stringify(card.dataset));
+            if (!card) return;
+            action_real_function({ card })
         });
         //#endregion
     } catch (error) {

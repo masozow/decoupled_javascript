@@ -10,13 +10,15 @@ export class ApiUserRepository {
 
     async search(query) {
         if (typeof query != 'string') throw new Error(ApiUserRepository.#errorPrefix + ' Query is required');
-        if (!query.trim()) return [];
+
         const response = await this.httpClient({ url: this.endpoint });
         if (!Array.isArray(response))
             throw new Error(
                 ApiUserRepository.#errorPrefix + `API response wasn't a valid Array: ${response}`
             );
-        return response.filter((user) => user.name.includes(query)).map((user) => new User(user.id, user.name, user.email));
+        const mappedUsers = response.map((user) => new User(user.id, user.name, user.email));
+        if (!query.trim()) return mappedUsers;
+        return mappedUsers.filter((user) => user.name.includes(query));
     }
 
 }
